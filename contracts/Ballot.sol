@@ -42,9 +42,38 @@ contract BallotContract{
 
     }    
 
+    function vote(uint256 proposalIndexId) external {
+
+        require(voters[msg.sender].isVoted == false,"Already Voted");
+        require(voters[msg.sender].weight!=0,"please get access");
+        voters[msg.sender].isVoted=true;
+        voters[msg.sender].votedTo=proposalIndexId;
+        proposals[proposalIndexId].voteCount += voters[msg.sender].weight;
+        
+    }
 
 
+    function winningProposal() public view returns(uint256)
+    {
+        uint256 winnerIndex=0;
+        uint256 maxcount=0;
+
+        for(uint64 i=0;i<proposals.length;i++)
+        {
+            if(proposals[i].voteCount > maxcount)
+            {
+                maxcount = proposals[i].voteCount;
+                winnerIndex=i;
+            }
+        }
+
+        return winnerIndex;
+    }
     
+    function winnerName() public view returns(bytes32)
+    {
+        return proposals[winningProposal()].name;
+    }
 
 
 
