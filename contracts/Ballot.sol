@@ -32,7 +32,7 @@ contract BallotContract{
 
     }
 
-    function giveAcessToVote(address voter_t)  external{
+    function giveAcessToVote(address voter_t)  public{
 
         require(msg.sender==admin,"you dont have access");
         require(voters[voter_t].isVoted == false,"Already voted");
@@ -42,7 +42,7 @@ contract BallotContract{
 
     }    
 
-    function vote(uint256 proposalIndexId) external {
+    function vote(uint256 proposalIndexId) public {
 
         require(voters[msg.sender].isVoted == false,"Already Voted");
         require(voters[msg.sender].weight!=0,"please get access");
@@ -75,10 +75,32 @@ contract BallotContract{
         return proposals[winningProposal()].name;
     }
 
+    function deligateMyVoteTo(address to) public {
 
+       Voter storage sender =voters[msg.sender];
+       require(msg.sender !=  to, "self deligation error");
+       require(sender.isVoted==false, "already voted");
 
+       while(voters[to].delegate!=address(0))
+       {
+            to = voters[to].delegate;
+            require(to != msg.sender,"loop in deligation" );
+       }
+       sender.isVoted=true;
+       sender.delegate = to;
 
+       Voter storage delegate_ = voters[to];
 
+       if(delegate_.isVoted ){
+
+            proposals[delegate_.votedTo].voteCount +=sender.weight ;
+
+       }
+       else{
+            delegate_.weight += sender.weight;
+       }
+        
+    }
 
 
 }
